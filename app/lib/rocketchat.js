@@ -1341,6 +1341,12 @@ const RocketChat = {
 
 		return userRoles.indexOf(r => r === role) > -1;
 	},
+	userHasRole(role) {
+		const loginUser = reduxStore.getState().login.user;
+		// get user roles on the server from redux
+		const userRoles = (loginUser?.roles) || [];
+		return userRoles.indexOf(role) > -1;
+	},
 	getRoomRoles(roomId, type) {
 		// RC 0.65.0
 		return this.sdk.get(`${ this.roomTypeToApiType(type) }.roles`, { roomId });

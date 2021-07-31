@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { connect } from 'react-redux';
 import { dequal } from 'dequal';
+import { Audio } from 'expo-av';
 import Orientation from 'react-native-orientation-locker';
 import { Q } from '@nozbe/watermelondb';
 import { withSafeAreaInsets } from 'react-native-safe-area-context';
@@ -160,15 +161,21 @@ class RoomsListView extends React.Component {
 			chats: [],
 			item: {}
 		};
+		this.sound = new Audio.Sound();
 		this.setHeader();
 		this.getSubscriptions();
 	}
 
-	componentDidMount() {
+	async componentDidMount() {
+		await this.loadSound();
+
+		const { chats } = this.state;
 		const {
 			navigation, closeServerDropdown
 		} = this.props;
 		this.mounted = true;
+
+		await this.handleContinuousSoundForUnread(chats);
 
 		if (isTablet) {
 			EventEmitter.addEventListener(KEY_COMMAND, this.handleCommands);
@@ -367,6 +374,17 @@ class RoomsListView extends React.Component {
 		};
 	}
 
+	loadSound = async() => {
+		await this.sound.loadAsync(
+			require('../../static/sound/chime.mp3'),
+			{ isLooping: true }
+		);
+	}
+
+	shouldPlayContinuousSoundForUnread = () => (
+		RocketChat.userHasRole('livechat-agent') || RocketChat.userHasRole('moderator') || RocketChat.userHasRole('fnb')
+	)
+
 	setHeader = () => {
 		const { navigation } = this.props;
 		const options = this.getHeader();
@@ -388,6 +406,20 @@ class RoomsListView extends React.Component {
 			allData = allData.concat(data);
 		}
 		return allData;
+	}
+
+	handleContinuousSoundForUnread = async(chats) => {
+		if (!this.shouldPlayContinuousSoundForUnread()) {
+			return;
+		}
+
+		const unread = chats.filter(s => filterIsUnread(s));
+
+		if (unread.length > 0) {
+			await this.sound.playAsync();
+		} else {
+			await this.sound.stopAsync();
+		}
 	}
 
 	getSubscriptions = async() => {
@@ -432,7 +464,7 @@ class RoomsListView extends React.Component {
 					Q.experimentalSkip(0),
 					Q.experimentalTake(this.count)
 				)
-				.observe();
+				.observeWithColumns(['alert']);
 		}
 
 		this.querySubscription = observable.subscribe((data) => {
@@ -502,6 +534,8 @@ class RoomsListView extends React.Component {
 				this.state.chatsUpdate = chatsUpdate;
 				this.state.loading = false;
 			}
+
+			this.handleContinuousSoundForUnread(data);
 		});
 	}
 
