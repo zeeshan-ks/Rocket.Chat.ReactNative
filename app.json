@@ -1,7 +1,7 @@
 {
-  "name": "RocketChatRN",
-  "share": "ShareRocketChatRN",
-  "displayName": "RocketChatRN",
+  "name": "SymplifiedRN",
+  "share": "ShareSymplifiedRN",
+  "displayName": "SymplifiedRN",
   "server": "https://open.rocket.chat",
   "appGroup": "group.ios.chat.rocket",
   "appStoreID": "1272915472"
