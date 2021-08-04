@@ -222,4 +222,4 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - android-build:
+      - android-build
