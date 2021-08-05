@@ -376,7 +376,7 @@ class RoomsListView extends React.Component {
 
 	loadSound = async() => {
 		await this.sound.loadAsync(
-			require('../../static/sound/chime.mp3'),
+			{ uri: 'asset:/sounds/chime.mp3' },
 			{ isLooping: true }
 		);
 	}
